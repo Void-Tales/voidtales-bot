@@ -89,6 +89,30 @@ TICKETS_CATEGORY_ID = 1308780597988036628
 # Channel ID for ticket transcripts
 TRANSCRIPT_CHANNEL_ID = 1308793574329946162
 
+# <-- Codex Wiki Settings -->
+
+# The team wiki sits behind a login and is deliberately not linked anywhere
+# public, so its address and its mirror come from the environment rather than
+# from this repository. Without them the cog stays off, which is also what any
+# other deployment of this bot wants.
+_CodexChannel = os.getenv('CODEX_CHANNEL_ID', '').strip()
+CodexChannelID = int(_CodexChannel) if _CodexChannel.isdigit() else 0
+CodexRepo = os.getenv('CODEX_REPO', '')
+CodexBaseUrl = os.getenv('CODEX_BASE_URL', '').rstrip('/')
+CodexBranch = os.getenv('CODEX_BRANCH', 'main')
+
+# Who gets pinged when a page changes. Discord only notifies from the message
+# text, never from inside an embed, so these end up above the embed.
+CodexMentionIDs = [
+	Id for Id in os.getenv('CODEX_MENTION_IDS', '').replace(' ', '').split(',') if Id.isdigit()
+]
+
+# Poll interval (in seconds). Wiki edits happen a few times a day, no rush.
+CodexPollInterval = 300
+
+# File path for the last seen commit
+CodexStateFile = 'codex_state.json'
+
 # <-- Bot Color Settings -->
 
 # Primary color for embeds (pastel green, used across all cogs)
