@@ -13,7 +13,6 @@ from Config import (
 	LiveStatusUpdateInterval,
 	LiveStatusFile,
 )
-from Utils.Plan import PlanAPI
 from Utils.Socket import GetStatus
 
 # 👾 Discord modules
@@ -58,7 +57,6 @@ class LiveStatusView(View):
 class LiveStatus(commands.Cog):
 	def __init__(self, Bot: commands.Bot) -> None:
 		self.Bot = Bot
-		self.PlanAPI = PlanAPI()
 		self.StatusMessage = None
 		self.Channel = None
 		self.OriginalChannelName = None
@@ -97,11 +95,8 @@ class LiveStatus(commands.Cog):
 		try:
 			# 🌐 Fetch server status
 			Status = GetStatus(DefaultServer, DefaultServerPort)
-			# 📈 Fetch performance data
-			ServerUUID = self.PlanAPI.Env.get('PLAN_SERVER_UUID')
-			PerfData = self.PlanAPI.GetPerformanceOverview(ServerUUID) if ServerUUID else None
 			Embed, File = CreateStatusEmbed(
-				Status, DefaultServer, DefaultServerPort, BotName, PerfData
+				Status, DefaultServer, DefaultServerPort, BotName
 			)
 
 			# Update channel name based on status

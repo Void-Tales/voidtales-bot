@@ -132,7 +132,7 @@ def GetChangeEmoji(Current: str, Previous: str, IsIncreaseGood: bool = True) -> 
 
 # 💡 Create status embed and file from server data
 def CreateStatusEmbed(
-	Status, Host: str, Port: int, BotName: str, PerfData: dict | None = None
+	Status, Host: str, Port: int, BotName: str
 ) -> tuple[discord.Embed, discord.File | None]:
 	# 📊 Format the response as an embed
 	Version = Status.get('version', {}).get('name', 'Unknown')
@@ -192,13 +192,10 @@ class Minecraft(commands.Cog):
 		try:
 			# 🌐 Fetch server status
 			Status = GetStatus(host, port)
-			# 📈 Fetch performance data
-			ServerUUID = self.PlanAPI.Env.get('PLAN_SERVER_UUID')
-			PerfData = self.PlanAPI.GetPerformanceOverview(ServerUUID) if ServerUUID else None
-			Embed, File = CreateStatusEmbed(Status, host, port, BotName, PerfData)
+			Embed, File = CreateStatusEmbed(Status, host, port, BotName)
 
 			# 🔄 Create and attach the refresh view
-			ViewInstance = RefreshView(host, port, BotName, self.PlanAPI)
+			ViewInstance = RefreshView(host, port, BotName)
 
 			if File:
 				await ctx.send(embed=Embed, file=File, view=ViewInstance)
@@ -262,12 +259,11 @@ class Minecraft(commands.Cog):
 
 
 class RefreshView(View):
-	def __init__(self, Host: str, Port: int, BotName: str, PlanAPI: PlanAPI):
+	def __init__(self, Host: str, Port: int, BotName: str):
 		super().__init__(timeout=None)
 		self.Host = Host
 		self.Port = Port
 		self.BotName = BotName
-		self.PlanAPI = PlanAPI
 
 	@discord.ui.button(
 		label='Refresh', style=discord.ButtonStyle.grey, emoji='<:Refresh:1422932521049657457>'
@@ -276,10 +272,7 @@ class RefreshView(View):
 		try:
 			# 🌐 Re-fetch server status
 			Status = GetStatus(self.Host, self.Port)
-			# 📈 Re-fetch performance data
-			ServerUUID = self.PlanAPI.Env.get('PLAN_SERVER_UUID')
-			PerfData = self.PlanAPI.GetPerformanceOverview(ServerUUID) if ServerUUID else None
-			Embed, File = CreateStatusEmbed(Status, self.Host, self.Port, self.BotName, PerfData)
+			Embed, File = CreateStatusEmbed(Status, self.Host, self.Port, self.BotName)
 			await interaction.response.edit_message(embed=Embed, view=self)
 		except Exception:
 			ErrorEmbed = discord.Embed(
