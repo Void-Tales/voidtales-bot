@@ -21,6 +21,8 @@ class PlanAPI:
 		)
 		self.Env = LoadEnv()
 		self.LoggedIn = False
+		# 🌐 Base URL, e.g. the plain host port to skip the public login gate
+		self.BaseUrl = (self.Env.get('PLAN_URL') or 'https://plan.voidtales.win').rstrip('/')
 
 	# 🔐 Login to get auth cookie
 	def Login(self) -> bool:
@@ -30,7 +32,7 @@ class PlanAPI:
 		Password = self.Env.get('PLAN_PASSWORD')
 		if not User or not Password:
 			return False
-		LoginUrl = 'https://plan.voidtales.win/auth/login'
+		LoginUrl = f'{self.BaseUrl}/auth/login'
 		Data = urllib.parse.urlencode({'user': User, 'password': Password}).encode('utf-8')
 		Req = urllib.request.Request(LoginUrl, data=Data, method='POST')
 		Req.add_header('accept', 'application/json')
@@ -40,6 +42,9 @@ class PlanAPI:
 				if Response.status == 200:
 					ResponseData = json.loads(Response.read().decode('utf-8'))
 					if ResponseData.get('success', False):
+						# 🍪 Plan marks its cookie Secure, which the jar would not send over plain http
+						for Cookie in self.CookieJar:
+							Cookie.secure = False
 						self.LoggedIn = True
 						return True
 		except Exception:
@@ -66,7 +71,7 @@ class PlanAPI:
 
 	# 📊 Fetch player stats with fuzzy matching
 	def GetPlayerStats(self, ServerUUID: str, PlayerName: str | None = None) -> dict | None:
-		Url = f'https://plan.voidtales.win/v1/playersTable?server={ServerUUID}'
+		Url = f'{self.BaseUrl}/v1/playersTable?server={ServerUUID}'
 		Data = self.FetchData(Url)
 		if not Data or not PlayerName:
 			return Data  # Return full data if no name, or None on failure
@@ -86,5 +91,5 @@ class PlanAPI:
 
 	# 📈 Fetch performance overview
 	def GetPerformanceOverview(self, ServerUUID: str) -> dict | None:
-		Url = f'https://plan.voidtales.win/v1/network/performanceOverview?servers=%5B%22{ServerUUID}%22%5D'
+		Url = f'{self.BaseUrl}/v1/network/performanceOverview?servers=%5B%22{ServerUUID}%22%5D'
 		return self.FetchData(Url)

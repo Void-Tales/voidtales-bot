@@ -23,6 +23,7 @@ def LoadEnv():
 			'PLAN_USER',
 			'PLAN_PASSWORD',
 			'PLAN_SERVER_UUID',
+			'PLAN_URL',
 		]
 		for Key in Keys:
 			Value = os.environ.get(Key)
