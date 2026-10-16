@@ -51,8 +51,17 @@ class PlanAPI:
 			pass
 		return False
 
-	# 🌐 Generic fetch data from Plan API
+	# 🌐 Generic fetch data from Plan API, logs in again once when the session has expired
 	def FetchData(self, Url: str) -> dict | None:
+		Data = self._Fetch(Url)
+		if Data is None:
+			# 🍪 Plan drops sessions after Cookies_expire_after (2 h on Void Tales)
+			self.LoggedIn = False
+			self.CookieJar.clear()
+			Data = self._Fetch(Url)
+		return Data
+
+	def _Fetch(self, Url: str) -> dict | None:
 		if not self.Login():
 			return None
 		Req = urllib.request.Request(Url)
