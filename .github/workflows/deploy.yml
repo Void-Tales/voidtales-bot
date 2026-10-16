@@ -17,7 +17,7 @@ jobs:
     - name: 🔄 Restart Bot Server via Pterodactyl API
       run: |
         # 📨 Send restart signal to Pterodactyl server
-        curl -X POST "${BOT_API_URL}" \
+        curl -sS --fail-with-body -X POST "${BOT_API_URL}" \
           -H "Authorization: Bearer ${BOT_API_KEY}" \
           -H "Content-Type: application/json" \
           --data '{"signal": "restart"}'
